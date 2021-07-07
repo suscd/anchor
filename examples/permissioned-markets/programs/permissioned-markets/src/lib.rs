@@ -60,7 +60,7 @@ pub mod permissioned_markets {
         accounts: &[AccountInfo],
         data: &[u8],
     ) -> ProgramResult {
-        assert!(accounts.len() >= 1);
+        require!(accounts.len() >= 1, NotEnoughAccounts);
 
         let dex_acc_info = &accounts[0];
         let dex_accounts = &accounts[1..];
@@ -73,7 +73,7 @@ pub mod permissioned_markets {
         // position, for the program's PDA (the real authority).
         let (market, user) = match ix {
             MarketInstruction::NewOrderV3(_) => {
-                assert!(dex_accounts.len() >= 13);
+                require!(dex_accounts.len() >= 13, NotEnoughAccounts);
 
                 let (market, user) = {
                     let market = &acc_infos[0];
@@ -91,7 +91,7 @@ pub mod permissioned_markets {
                 (market, user)
             }
             MarketInstruction::CancelOrderV2(_) => {
-                assert!(dex_accounts.len() >= 6);
+                require!(dex_accounts.len() >= 6, NotEnoughAccounts);
 
                 let (market, user) = {
                     let market = &acc_infos[0];
@@ -109,7 +109,7 @@ pub mod permissioned_markets {
                 (market, user)
             }
             MarketInstruction::CancelOrderByClientIdV2(_) => {
-                assert!(dex_accounts.len() >= 6);
+                require!(dex_accounts.len() >= 6, NotEnoughAccounts);
 
                 let (market, user) = {
                     let market = &acc_infos[0];
@@ -127,7 +127,7 @@ pub mod permissioned_markets {
                 (market, user)
             }
             MarketInstruction::SettleFunds => {
-                assert!(dex_accounts.len() >= 10);
+                require!(dex_accounts.len() >= 10, NotEnoughAccounts);
 
                 let (market, user) = {
                     let market = &acc_infos[0];
@@ -149,7 +149,7 @@ pub mod permissioned_markets {
                 (market, user)
             }
             MarketInstruction::CloseOpenOrders => {
-                assert!(dex_accounts.len() >= 4);
+                require!(dex_accounts.len() >= 4, NotEnoughAccounts);
 
                 let (market, user) = {
                     let market = &acc_infos[3];
@@ -259,6 +259,8 @@ pub enum ErrorCode {
     InvalidReferral,
     #[msg("The user didn't sign")]
     UnauthorizedUser,
+    #[msg("Not enough accounts were provided")]
+    NotEnoughAccounts,
 }
 
 // Macros.
