@@ -1,3 +1,5 @@
+// WIP.
+
 use anchor_lang::prelude::*;
 use anchor_spl::dex;
 use serum_dex::instruction::MarketInstruction;
@@ -132,9 +134,9 @@ pub mod permissioned_markets {
                 let (market, user) = {
                     let market = &acc_infos[0];
                     let user = &acc_infos[2];
-                    let referral = &dex_accounts[10];
+                    let referral = &dex_accounts[9];
 
-                    if referral.key != &fee_owner::ID {
+                    if !DISABLE_REFERRAL && referral.key != &referral::ID {
                         return Err(ErrorCode::InvalidReferral.into());
                     }
                     if !user.is_signer {
@@ -332,8 +334,11 @@ fn prepare_pda<'info>(acc_info: &AccountInfo<'info>) -> AccountInfo<'info> {
 // b"serum".len() + b"padding".len().
 const SERUM_PADDING: usize = 12;
 
+// True if we don't care about referral access control (for testing).
+const DISABLE_REFERRAL: bool = true;
+
 /// The address that will receive all fees for all markets controlled by this
 /// program. Note: this is a dummy address. Do not use in production.
-pub mod fee_owner {
+pub mod referral {
     solana_program::declare_id!("2k1bb16Hu7ocviT2KC3wcCgETtnC8tEUuvFBH4C5xStG");
 }
