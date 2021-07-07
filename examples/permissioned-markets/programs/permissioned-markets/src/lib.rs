@@ -66,14 +66,14 @@ pub mod permissioned_markets {
         let dex_accounts = &accounts[1..];
         let mut acc_infos = dex_accounts.to_vec();
 
-        // Decode the dex instruction.
-        let ix = MarketInstruction::unpack(data).ok_or_else(|| ErrorCode::InvalidInstruction)?;
+        // Decode instruction.
+        let ix = MarketInstruction::unpack(data).ok_or_else(|| ErrorCode::CannotUnpack)?;
 
         // Swap the user's account, which is in the open orders authority
         // position, for the program's PDA (the real authority).
         let (market, user) = match ix {
             MarketInstruction::NewOrderV3(_) => {
-                require!(dex_accounts.len() >= 13, NotEnoughAccounts);
+                require!(dex_accounts.len() >= 12, NotEnoughAccounts);
 
                 let (market, user) = {
                     let market = &acc_infos[0];
@@ -255,6 +255,8 @@ pub enum ErrorCode {
     InvalidDexPid,
     #[msg("Invalid instruction given")]
     InvalidInstruction,
+    #[msg("Could not unpack the instruction")]
+    CannotUnpack,
     #[msg("Invalid referral address given")]
     InvalidReferral,
     #[msg("The user didn't sign")]

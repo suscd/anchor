@@ -11,6 +11,15 @@ incremented for features.
 
 ## [Unreleased]
 
+### Features
+
+* lang: Adds `require` macro for specifying assertions that return error codes on failure ([#]()).
+* lang: Allow one to specify arbitrary programs as the owner when creating PDA ([#]()).
+
+### Fixes
+
+* lang: Preserve all instruction data for fallback functions ([#]())..
+
 ## [0.11.0] - 2021-07-03
 
 ### Features
