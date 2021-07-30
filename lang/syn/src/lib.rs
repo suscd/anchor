@@ -31,12 +31,13 @@ pub struct Program {
     pub name: Ident,
     pub program_mod: ItemMod,
     pub fallback_fn: Option<FallbackFn>,
+    pub args: Option<ProgramArgs>,
 }
 
 impl Parse for Program {
     fn parse(input: ParseStream) -> ParseResult<Self> {
         let program_mod = <ItemMod as Parse>::parse(input)?;
-        program_parser::parse(program_mod)
+        program_parser::parse(program_mod, None)
     }
 }
 
@@ -49,6 +50,27 @@ impl From<&Program> for TokenStream {
 impl ToTokens for Program {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         tokens.extend::<TokenStream>(self.into());
+    }
+}
+
+#[derive(Debug)]
+pub struct ProgramArgs {
+    pub error: Option<Ident>,
+}
+
+impl Parse for ProgramArgs {
+    fn parse(input: ParseStream) -> ParseResult<Self> {
+        let span = input.span();
+        let arg_name = input.call(Ident::parse_any)?;
+        if arg_name.to_string() != "error" {
+            return Err(ParseError::new(span, "expected keyword error"));
+        }
+
+        input.parse::<Token![=]>()?;
+
+        Ok(ProgramArgs {
+            error: input.parse()?,
+        })
     }
 }
 

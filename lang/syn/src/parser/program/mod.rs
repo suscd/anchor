@@ -1,11 +1,11 @@
-use crate::Program;
+use crate::{Program, ProgramArgs};
 use syn::parse::{Error as ParseError, Result as ParseResult};
 use syn::spanned::Spanned;
 
 mod instructions;
 mod state;
 
-pub fn parse(program_mod: syn::ItemMod) -> ParseResult<Program> {
+pub fn parse(program_mod: syn::ItemMod, args: Option<ProgramArgs>) -> ParseResult<Program> {
     let state = state::parse(&program_mod)?;
     let (ixs, fallback_fn) = instructions::parse(&program_mod)?;
     Ok(Program {
@@ -14,6 +14,7 @@ pub fn parse(program_mod: syn::ItemMod) -> ParseResult<Program> {
         name: program_mod.ident.clone(),
         program_mod,
         fallback_fn,
+        args,
     })
 }
 

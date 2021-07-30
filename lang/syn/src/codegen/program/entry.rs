@@ -6,6 +6,33 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
     let fallback_maybe = dispatch::gen_fallback(program).unwrap_or(quote! {
         Err(anchor_lang::__private::ErrorCode::InstructionMissing.into());
     });
+
+    let match_custom_error = match &program.args {
+        Some(args) if args.error.is_some() => {
+            let error_name = args.error.as_ref().unwrap();
+
+            quote! {
+                anchor_lang::solana_program::program_error::ProgramError::Custom(id) => {
+                    if id > anchor_lang::__private::ERROR_CODE_OFFSET {
+                        let actual_error: std::result::Result<#error_name, ()> = std::convert::TryFrom::try_from(id);
+
+                        if let Ok(e) = actual_error {
+                            anchor_lang::solana_program::msg!(&e.to_string());
+                        }
+                    } else {
+                        let actual_error: std::result::Result<anchor_lang::__private::ErrorCode, ()> = std::convert::TryFrom::try_from(id);
+
+                        if let Ok(e) = actual_error {
+                            anchor_lang::solana_program::msg!(&e.to_string());
+                        }
+                    }
+                }
+            }
+        }
+
+        _ => quote! {},
+    };
+
     quote! {
         #[cfg(not(feature = "no-entrypoint"))]
         anchor_lang::solana_program::entrypoint!(entry);
@@ -61,6 +88,10 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
 
             dispatch(program_id, accounts, data)
                 .map_err(|e| {
+                    match e {
+                        #match_custom_error
+                        _ => ()
+                    };
                     anchor_lang::solana_program::msg!(&e.to_string());
                     e
                 })

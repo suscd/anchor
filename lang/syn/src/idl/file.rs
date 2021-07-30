@@ -16,7 +16,7 @@ const ERROR_CODE_OFFSET: u32 = 300;
 pub fn parse(filename: impl AsRef<Path>) -> Result<Idl> {
     let ctx = CrateContext::parse(filename)?;
 
-    let p = program::parse(parse_program_mod(&ctx))?;
+    let p = program::parse(parse_program_mod(&ctx), None)?;
 
     let accs = parse_account_derives(&ctx);
 
